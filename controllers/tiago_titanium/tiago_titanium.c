@@ -26,6 +26,7 @@
 #include <webots/keyboard.h>
 #include <webots/motor.h>
 #include <webots/robot.h>
+#include <webots/speaker.h>
 
 #define MAX_SPEED 7.0  // [rad/s]
 #define N_PARTS 45
@@ -103,13 +104,13 @@ const double pos_rock[N_PARTS] = {0.24,  -0.67, 0.09,
                                 -0.22, 0.79, 0.32, 0.79, 0.42, 0.79,  0.79,
                                 -0.52, 0.79,  0.79, 0.79, 0.37, 0.79,  0.62, 
                                 INFINITY, INFINITY};                              
-const double pos_default[N_PARTS] = {0.00,  0.00, 0.00, 
-                                0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00, 
-                                0.00,  0.00, 0.00,  0.00,  0.00, 
-                                0.00, 0.00, 0.00,  0.00, 0.00, 0.00, 0.00, 
-                                0.00, 0.00, 0.00,  0.00,  0.00, 0.00, 0.00, 
-                                0.00, 0.00, 0.00, 0.00, 0.00, 0.00,  0.00,
-                                0.00, 0.00,  0.00, 0.00, 0.00, 0.00,  0.00, 
+const double pos_default[N_PARTS] = {0.0, 0.0, 0.09, 
+                                0.07, 0.26, -3.16, 1.27, 1.32, 0.00, 1.41, 
+                                1.55,  0.79, 0.68,  0.79,  0.00, 
+                                0.00, 0.79, 0.00,  0.79, 0.00, 0.79, 0.00, 
+                                -0.08, 0.79, 0.00,  0.79,  0.00, 0.79, 0.00, 
+                                -0.22, 0.79, 0.32, 0.79, 0.42, 0.79,  0.79,
+                                -0.52, 0.79,  0.79, 0.79, 0.37, 0.79,  0.62,
                                 INFINITY, INFINITY}; 
                                 
 static void play(const double *pos){
@@ -123,61 +124,64 @@ static void play(const double *pos){
 static void win(){
   double values[2] = {0.35,0.0};
   wb_motor_set_position(robot_parts[2], 0.0);
-  for(int t = 0; t <6; t++){
+  for(int t = 0; t < 6; t++){
     wb_motor_set_position(robot_parts[2], values[t%2]);
   }
   wb_motor_set_position(robot_parts[2], 0.0);
 }
 
-static void check_keyboard() {
+static void check_keyboard(WbDeviceTag S1) {
   double speeds_left = 0.0, speeds_right = 0.0;
 
   int key = wb_keyboard_get_key();
   if (key >= 0) {
     switch (key) {
-      case WB_KEYBOARD_UP:
-        wb_motor_set_velocity(robot_parts[2], wb_motor_get_max_velocity(robot_parts[2]));
-        wb_motor_set_position(robot_parts[2], 0.2);
-        break;
-      case WB_KEYBOARD_DOWN:
-        wb_motor_set_velocity(robot_parts[2], wb_motor_get_max_velocity(robot_parts[2]));
-        wb_motor_set_position(robot_parts[2], 0.0);
-        break;
-      case WB_KEYBOARD_RIGHT:
-        wb_motor_set_velocity(robot_parts[0], wb_motor_get_max_velocity(robot_parts[0]));
-        wb_motor_set_position(robot_parts[0], -0.60);
-        wb_motor_set_velocity(robot_parts[1], wb_motor_get_max_velocity(robot_parts[0]));
-        wb_motor_set_position(robot_parts[1], 1.00);
-        break;
-      case WB_KEYBOARD_LEFT:
-        wb_motor_set_velocity(robot_parts[0], wb_motor_get_max_velocity(robot_parts[0]));
-        wb_motor_set_position(robot_parts[0], -0.60);
-        wb_motor_set_velocity(robot_parts[1], wb_motor_get_max_velocity(robot_parts[0]));
-        wb_motor_set_position(robot_parts[1], -1.00);
-        break;
+      // case WB_KEYBOARD_UP:
+        // wb_motor_set_velocity(robot_parts[2], wb_motor_get_max_velocity(robot_parts[2]));
+        // wb_motor_set_position(robot_parts[2], 0.2);
+        // break;
+      // case WB_KEYBOARD_DOWN:
+        // wb_motor_set_velocity(robot_parts[2], wb_motor_get_max_velocity(robot_parts[2]));
+        // wb_motor_set_position(robot_parts[2], 0.0);
+        // break;
+      // case WB_KEYBOARD_RIGHT:
+        // wb_motor_set_velocity(robot_parts[0], wb_motor_get_max_velocity(robot_parts[0]));
+        // wb_motor_set_position(robot_parts[0], -0.60);
+        // wb_motor_set_velocity(robot_parts[1], wb_motor_get_max_velocity(robot_parts[0]));
+        // wb_motor_set_position(robot_parts[1], 1.00);
+        // break;
+      // case WB_KEYBOARD_LEFT:
+        // wb_motor_set_velocity(robot_parts[0], wb_motor_get_max_velocity(robot_parts[0]));
+        // wb_motor_set_position(robot_parts[0], -0.60);
+        // wb_motor_set_velocity(robot_parts[1], wb_motor_get_max_velocity(robot_parts[0]));
+        // wb_motor_set_position(robot_parts[1], -1.00);
+        // break;
       case 'P':
         play(pos_paper);
+        wb_speaker_speak(S1, "paper", 1);
         break;
       case 'S':
         play(pos_scissors);
+        wb_speaker_speak(S1, "scissors", 1);
         break;
       case 'R':
         play(pos_rock);
+        wb_speaker_speak(S1, "rock", 1);
         break;
       case 'D':
         play(pos_default);
         break;
       case 'W':
-        win();
+        wb_speaker_speak(S1, "I win! I am the master of rock paper scissors!", 1);
         break;
       case 'L':
-        wb_motor_set_position(robot_parts[0], -0.60);
-        wb_motor_set_position(robot_parts[1], -1.00);
-        wb_motor_set_position(robot_parts[1], 1.00);
-        wb_motor_set_position(robot_parts[1], -1.00);
-        wb_motor_set_position(robot_parts[1], 1.00);
-        wb_motor_set_position(robot_parts[1], -1.00);
-        wb_motor_set_position(robot_parts[1], 1.00);
+        wb_speaker_speak(S1, "Aw matn. I won't let you get away next time.", 1);
+        break;
+      case 'T':
+        wb_speaker_speak(S1, "Wow! It is a Tie!", 1);
+        break;
+      case ' ':
+        wb_speaker_speak(S1, "Rock, Paper, Scissor, Shoot!", 1);
         break;
     }
   }
@@ -188,16 +192,26 @@ static void check_keyboard() {
 int main(int argc, char **argv) {
   // init webots stuff
   wb_robot_init();
-
+  
   const int time_step = wb_robot_get_basic_time_step();
-
+  
   // get devices
+  for (int i = 0; i < N_PARTS; i++){
+    robot_parts[i] = wb_robot_get_device(names[i]);
+  }
+  
+  WbDeviceTag S1 = wb_robot_get_device("speaker");
+  if (S1 == 0) {
+    printf("did not get the speaker");
+  } else {
+    printf("get the speaker");
+  }
   // initialize the robot's information
 
-  // double target_pos[N_PARTS] = {0.24,  -0.67, 0.09, 0.07, 0.26, -3.16, 1.27, 1.32,     0.00,    1.41, 1.55,  0.79,
-                                // 0.68,  0.00,  0.00, 0.00, 0.00, 0.00,  0.00, 0.00,     0.00,    0.00, -0.08, 0.00,
-                                // 0.00,  0.00,  0.00, 0.00, 0.00, -0.22, 0.00, 0.32,     0.79,    0.42, 0.79,  0.79,
-                                // -0.52, 0.00,  0.79, 0.79, 0.37, 0.79,  0.62, INFINITY, INFINITY};
+  //double target_pos[N_PARTS] = {0.24,  -0.67, 0.09, 0.07, 0.26, -3.16, 1.27, 1.32,     0.00,    1.41, 1.55,  0.79,
+                                //0.68,  0.00,  0.00, 0.00, 0.00, 0.00,  0.00, 0.00,     0.00,    0.00, -0.08, 0.00,
+                                //0.00,  0.00,  0.00, 0.00, 0.00, -0.22, 0.00, 0.32,     0.79,    0.42, 0.79,  0.79,
+                                //-0.52, 0.00,  0.79, 0.79, 0.37, 0.79,  0.62, INFINITY, INFINITY};
 
   // configures and achieves the robot's position desired
 
@@ -205,15 +219,19 @@ int main(int argc, char **argv) {
   printf("You can drive this robot by selecting the 3D window and pressing the keyboard arrows.\n");
   // enable keyboard
   wb_keyboard_enable(time_step);
+  
+  // set speaker
+  wb_speaker_set_engine(S1, "microsoft");
+  
+  // set language 
+  wb_speaker_set_language(S1, "en-US");
 
   //const double initialTime = wb_robot_get_time();
-
+  
+  play(pos_default);
   while (wb_robot_step(time_step) != -1) {
-    check_keyboard();
+    check_keyboard(S1);
 
-    // Hello mouvement
-    // const double time = wb_robot_get_time() - initialTime;
-    //wb_motor_set_position(robot_parts[8], 0.3 * sin(5.0 * time) - 0.3);
   };
 
   wb_robot_cleanup();
